@@ -29,17 +29,26 @@ public class BossHealthMultiplier : TerrariaPlugin
 
     private void OnNpcSpawn(NpcSpawnEventArgs args)
     {
+        // Ambil index NPC dari event args
+        int npcIndex = args.NpcId;
+
+        // Pastikan index valid (kadang bisa -1 atau melebihi Main.maxNPCs)
+        if (npcIndex < 0 || npcIndex >= Main.maxNPCs)
+            return;
+
+        // Ambil NPC dari array Main.npc
+        NPC npc = Main.npc[npcIndex];
+
         // Jika NPC adalah boss, ubah HP-nya
-        if (args.Npc.boss)
+        if (npc.boss)
         {
-            // Ambil multiplier dari config
             float multiplier = config.HealthMultiplier;
 
-            // Jika multiplier tidak 1 (artinya ada perubahan), ubah HP boss
+            // Jika multiplier != 1, artinya ada perubahan HP
             if (multiplier != 1.0f)
             {
-                args.Npc.lifeMax = (int)(args.Npc.lifeMax * multiplier);
-                args.Npc.life = args.Npc.lifeMax;
+                npc.lifeMax = (int)(npc.lifeMax * multiplier);
+                npc.life = npc.lifeMax;
             }
         }
     }
@@ -50,7 +59,7 @@ public class BossHealthMultiplier : TerrariaPlugin
         {
             if (!File.Exists(ConfigPath))
             {
-                // Jika file tidak ada, buat file config dengan multiplier default 1 (tidak ada perubahan)
+                // Buat file config default dengan multiplier 1.0
                 config = new BossConfig { HealthMultiplier = 1.0f };
                 SaveConfig();
             }
@@ -63,7 +72,7 @@ public class BossHealthMultiplier : TerrariaPlugin
         catch (Exception ex)
         {
             TShock.Log.Error("Gagal memuat konfigurasi BossHealthMultiplier: " + ex.Message);
-            // Jika terjadi error, gunakan multiplier default
+            // Gunakan multiplier default jika gagal
             config = new BossConfig { HealthMultiplier = 1.0f };
         }
     }
@@ -93,6 +102,6 @@ public class BossHealthMultiplier : TerrariaPlugin
 
 public class BossConfig
 {
-    // Atur multiplier HP boss, misalnya 2.5 untuk menggandakan HP boss sebanyak 2.5 kali lipat.
+    // Nilai multiplier HP boss. Contoh: 2.5 berarti boss punya HP 2.5x lipat.
     public float HealthMultiplier { get; set; }
 }
